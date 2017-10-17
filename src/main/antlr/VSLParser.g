@@ -21,6 +21,7 @@ program returns [ASD.Program out]
 
 expression returns [ASD.Expression out]
     : l=factor PLUS r=expression  { $out = new ASD.AddExpression($l.out, $r.out); }
+    | l=factor TIMES r=expression { $out = new ASD.TimesExpression($l.out, $r.out); }
     | f=factor { $out = $f.out; }
     // TODO : that's all?
     ;
