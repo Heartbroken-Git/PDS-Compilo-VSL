@@ -24,6 +24,8 @@ RP    : ')' ;
 PLUS      : '+'      ;
 MINUS      : '-'      ;
 TIMES     : '*'      ;
+SDIV     : '/'      ;
+
 
 // TODO : other keywords
 

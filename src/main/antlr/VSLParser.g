@@ -28,11 +28,13 @@ expression returns [ASD.Expression out]
 
 expression2 returns [ASD.Expression out]
     : l=factor TIMES r=expression2 { $out = new ASD.TimesExpression($l.out, $r.out); }
+    | l=factor SDIV r=expression2 { $out = new ASD.SDivExpression($l.out, $r.out); }
     | f=factor { $out = $f.out; }
     ;
 
 factor returns [ASD.Expression out]
     : p=primary { $out = $p.out; }
+    | LP e=expression RP { $out = $e.out; }
     // TODO : that's all?
     ;
 

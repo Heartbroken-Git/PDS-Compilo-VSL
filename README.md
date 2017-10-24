@@ -2,8 +2,8 @@
 
 ## Compilation
 
-1. Compiler les nouvelles sources `.java` et `.g` (par exemple avec le make d'*IntelliJ*).
-2. Lancer `gradle build` depuis la racine du projet
+1. Lancer `gradle build` depuis la racine du projet
+2. Compiler les nouvelles sources `.java` et `.g` (par exemple avec le make d'*IntelliJ*).
 
 ## Exécution
 
