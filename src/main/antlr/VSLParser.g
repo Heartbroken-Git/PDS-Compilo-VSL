@@ -20,10 +20,15 @@ program returns [ASD.Program out]
     ;
 
 expression returns [ASD.Expression out]
-    : l=factor PLUS r=expression  { $out = new ASD.AddExpression($l.out, $r.out); }
-    | l=factor TIMES r=expression { $out = new ASD.TimesExpression($l.out, $r.out); }
-    | f=factor { $out = $f.out; }
+    : l=expression2 PLUS r=expression  { $out = new ASD.AddExpression($l.out, $r.out); }
+    | l=expression2 MINUS r=expression { $out = new ASD.SubExpression($l.out, $r.out); }
+    | f=expression2 { $out = $f.out; }
     // TODO : that's all?
+    ;
+
+expression2 returns [ASD.Expression out]
+    : l=factor TIMES r=expression2 { $out = new ASD.TimesExpression($l.out, $r.out); }
+    | f=factor { $out = $f.out; }
     ;
 
 factor returns [ASD.Expression out]
