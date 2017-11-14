@@ -16,7 +16,12 @@ options {
 // TODO : other rules
 
 program returns [ASD.Program out]
-    : e=expression { $out = new ASD.Program($e.out); } // TODO : change when you extend the language
+    : s=statement { $out = new ASD.Program($s.out); } // TODO : change when you extend the language
+    ;
+
+statement returns [ASD.statement out]
+    : e=expression { $out = new ASD.Program($e.out); }
+    | a=assignment { $out = new ASD.Program($a.out); }
     ;
 
 expression returns [ASD.Expression out]
@@ -40,5 +45,6 @@ factor returns [ASD.Expression out]
 
 primary returns [ASD.Expression out]
     : INTEGER { $out = new ASD.IntegerExpression($INTEGER.int); }
+    //| IDENT { $out = new ASD.IdentExpression($IDENT.text); }
     // TODO : that's all?
     ;

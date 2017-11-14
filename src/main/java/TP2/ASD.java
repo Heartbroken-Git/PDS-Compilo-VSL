@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 public class ASD {
   static public class Program {
-    Expression e; // What a program contains. TODO : change when you extend the language
+    Statement s; // What a program contains. TODO : change when you extend the language
 
-    public Program(Expression e) {
-      this.e = e;
+    public Program(Statement s) {
+      this.s = s;
     }
 
     // Pretty-printer
     public String pp() {
-      return e.pp();
+      return s.pp();
     }
 
     // IR generation
@@ -22,24 +22,53 @@ public class ASD {
       // TODO : change when you extend the language
 
       // computes the IR of the expression
-      Expression.RetExpression retExpr = e.toIR();
-      // add a return instruction
-      Llvm.Instruction ret = new Llvm.Return(retExpr.type.toLlvmType(), retExpr.result);
-      retExpr.ir.appendCode(ret);
+      Statement.RetStatement retStmt = s.toIR();
+      if (retStmt instanceof Expression.RetExpression) {
+        Expression.RetExpression retExpr = (Expression.RetExpression)retStmt;
+        // add a return instruction
+        Llvm.Instruction ret = new Llvm.Return(retExpr.type.toLlvmType(), retExpr.result);
+        retStmt.ir.appendCode(ret);
+      }
 
-      return retExpr.ir;
+      return retStmt.ir;
     }
   }
 
   // All toIR methods returns the IR, plus extra information (synthesized attributes)
   // They can take extra arguments (inherited attributes)
 
-  static public abstract class Expression {
+  static public abstract class Statement {
+    public abstract String pp();
+    public abstract RetStatement toIR() throws TypeException;
+
+    static public abstract class RetStatement{
+      public Llvm.IR ir;
+    }
+  }
+
+
+
+  static public abstract class Assignement extends Statement{
+    public abstract String pp();
+    public abstract RetAssignement toIR() throws TypeException;
+
+    // Object returned by toIR on expressions, with IR + synthesized attributes
+    static public class RetAssignement extends RetStatement{
+      // The LLVM IR:
+      public Llvm.IR ir;
+
+      public RetAssignement(Llvm.IR ir) {
+        this.ir = ir;
+      }
+    }
+  }
+
+  static public abstract class Expression extends Statement{
     public abstract String pp();
     public abstract RetExpression toIR() throws TypeException;
 
     // Object returned by toIR on expressions, with IR + synthesized attributes
-    static public class RetExpression {
+    static public class RetExpression extends RetStatement{
       // The LLVM IR:
       public Llvm.IR ir;
       // And additional stuff:

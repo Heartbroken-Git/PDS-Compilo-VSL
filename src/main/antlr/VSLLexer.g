@@ -25,6 +25,7 @@ PLUS      : '+'      ;
 MINUS      : '-'      ;
 TIMES     : '*'      ;
 SDIV     : '/'      ;
+ASSIGN     : ':='      ;
 
 
 // TODO : other keywords
