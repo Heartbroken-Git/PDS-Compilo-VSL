@@ -176,5 +176,19 @@ public class Llvm {
     }
   }
 
+  static public class Assign extends Instruction {
+    String left;
+    String right;
+
+    public Assign(String left, String right) {
+      this.left = left;
+      this.right = right;
+    }
+
+    public String toString() {
+      return " store " + right + ", " + left + "\n";
+    }
+  }
+
   // TODO : other instructions
 }

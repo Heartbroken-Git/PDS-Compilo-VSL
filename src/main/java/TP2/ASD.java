@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 public class ASD {
   static public class Program {
-    Statement s; // What a program contains. TODO : change when you extend the language
+    Expression e; // What a program contains. TODO : change when you extend the language
 
     public Program(Statement s) {
-      this.s = s;
+      this.e = e;
     }
 
     // Pretty-printer
     public String pp() {
-      return s.pp();
+      return e.pp();
     }
 
     // IR generation
@@ -22,15 +22,13 @@ public class ASD {
       // TODO : change when you extend the language
 
       // computes the IR of the expression
-      Statement.RetStatement retStmt = s.toIR();
-      if (retStmt instanceof Expression.RetExpression) {
-        Expression.RetExpression retExpr = (Expression.RetExpression)retStmt;
-        // add a return instruction
-        Llvm.Instruction ret = new Llvm.Return(retExpr.type.toLlvmType(), retExpr.result);
-        retStmt.ir.appendCode(ret);
-      }
+      Expression.RetExpression retExpr = e.toIR();
+      // add a return instruction
+      Llvm.Instruction ret = new Llvm.Return(retExpr.type.toLlvmType(), retExpr.result);
+      retExpr.ir.appendCode(ret);
 
-      return retStmt.ir;
+
+      return retExpr.ir;
     }
   }
 
@@ -41,34 +39,44 @@ public class ASD {
     public abstract String pp();
     public abstract RetStatement toIR() throws TypeException;
 
-    static public abstract class RetStatement{
-      public Llvm.IR ir;
-    }
-  }
-
-
-
-  static public abstract class Assignement extends Statement{
-    public abstract String pp();
-    public abstract RetAssignement toIR() throws TypeException;
-
-    // Object returned by toIR on expressions, with IR + synthesized attributes
-    static public class RetAssignement extends RetStatement{
+    static public class RetStatement{
       // The LLVM IR:
       public Llvm.IR ir;
 
-      public RetAssignement(Llvm.IR ir) {
+      public RetStatement(Llvm.IR ir) {
         this.ir = ir;
+      }
+
+    }
+  }
+
+  static public abstract class Assignable{
+    public abstract String pp();
+    public abstract RetAssignable toIR() throws TypeException;
+
+    // Object returned by toIR on expressions, with IR + synthesized attributes
+    static public class RetAssignable{
+      // The LLVM IR:
+      public Llvm.IR ir;
+      // And additional stuff:
+      public Type type;
+      public String result; // The name containing the expression's result
+// (either an identifier, or an immediate value)
+
+      public RetAssignable(Llvm.IR ir, Type type, String result) {
+        this.ir = ir;
+        this.type = type;
+        this.result = result;
       }
     }
   }
 
-  static public abstract class Expression extends Statement{
+  static public abstract class Expression{
     public abstract String pp();
     public abstract RetExpression toIR() throws TypeException;
 
     // Object returned by toIR on expressions, with IR + synthesized attributes
-    static public class RetExpression extends RetStatement{
+    static public class RetExpression{
       // The LLVM IR:
       public Llvm.IR ir;
       // And additional stuff:
@@ -276,6 +284,43 @@ public class ASD {
       // Here we simply return an empty IR
       // the `result' of this expression is the integer itself (as string)
       return new RetExpression(new Llvm.IR(Llvm.empty(), Llvm.empty()), new IntType(), "" + value);
+    }
+  }
+
+  // Concrete class for Statement: assignement case
+  static public class Assignement extends Statement {
+    Assignable left;
+    Expression right;
+
+    public Assignement (Assignable a, Expression e){
+      left = a;
+      right = e;
+
+    }
+
+    public String pp() {
+      return "(" + left.pp() + " := " + right.pp() + ")";
+    }
+
+    public RetStatement toIR() throws TypeException {
+      Assignable.RetAssignable leftRet = left.toIR();
+      Expression.RetExpression rightRet = right.toIR();
+
+      // We check if the types mismatches
+      if(!leftRet.type.equals(rightRet.type)) {
+        throw new TypeException("type mismatch: have " + leftRet.type + " and " + rightRet.type);
+      }
+
+      // We base our build on the left generated IR:
+      // append right code
+      leftRet.ir.append(rightRet.ir);
+
+      // new mul instruction result = left := right
+      Llvm.Instruction assign = new Llvm.Assign(leftRet.result, rightRet.result);
+      
+      leftRet.ir.appendCode(assign);
+
+      return new RetStatement(leftRet.ir);
     }
   }
 
