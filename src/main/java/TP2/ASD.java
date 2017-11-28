@@ -54,50 +54,38 @@ public class ASD {
     }
   }
 
-  static public abstract class Assignable extends Statement{
-    /*
-    public abstract String pp();
-    public abstract RetStatement toIR() throws TypeException;
+  static public abstract class Assignable extends Statement{}
 
-    // Object returned by toIR on expressions, with IR + synthesized attributes
-    static public class RetAssignable{
-      // The LLVM IR:
-      public Llvm.IR ir;
-      // And additional stuff:
-      public Type type;
-      public String result; // The name containing the expression's result
-// (either an identifier, or an immediate value)
+  static public abstract class Expression extends Statement{}
 
-      public RetAssignable(Llvm.IR ir, Type type, String result) {
-        this.ir = ir;
-        this.type = type;
-        this.result = result;
-      }
-    }*/
+  static public class Bloc {
+    Statement s; // What a program contains. TODO : change when you extend the language
+
+    public Bloc(Statement s) {
+      this.s = s;
+    }
+
+    // Pretty-printer
+    public String pp() {
+      return s.pp();
+    }
+
+    // IR generation
+    public Llvm.IR toIR() throws TypeException {
+      // TODO : change when you extend the language
+
+      // computes the IR of the expression
+
+      //For tout les statements
+      Statement.RetStatement retStmt = s.toIR();
+      // add a return instruction
+      Llvm.Instruction ret = new Llvm.Return(retStmt.type.toLlvmType(), retStmt.result);
+      retStmt.ir.appendCode(ret);
+      //Fin du For
+
+      return retStmt.ir;
+    }
   }
-
-  static public abstract class Expression extends Statement{
-    /*
-    public abstract String pp();
-    public abstract RetStatement toIR() throws TypeException;
-
-    // Object returned by toIR on expressions, with IR + synthesized attributes
-    static public class RetExpression{
-      // The LLVM IR:
-      public Llvm.IR ir;
-      // And additional stuff:
-      public Type type; // The type of the expression
-      public String result; // The name containing the expression's result
-      // (either an identifier, or an immediate value)
-
-      public RetExpression(Llvm.IR ir, Type type, String result) {
-        this.ir = ir;
-        this.type = type;
-        this.result = result;
-      }
-    }*/
-  }
-
 
   // Concrete class for Expression: add case
   static public class AddExpression extends Expression {

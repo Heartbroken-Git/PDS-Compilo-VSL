@@ -16,14 +16,13 @@ options {
 // TODO : other rules
 
 program returns [ASD.Program out]
-    : e=expression { $out = new ASD.Program($e.out); }
-    | a=assignment { $out = new ASD.Program($a.out); }
-    ;
+    : b=bloc { $out = new ASD.Program($b.out); }
 
-//statement returns [ASD.Statement out]
-//    : e=expression { $out = new ASD.Statement($e.out); }
-//    | a=assignment { $out = new ASD.Statement($a.out); }
-//    ;
+bloc returns [ASD.Bloc out]
+    : b1=bloc b2=bloc { //TODO Concatenation des 2 blocs }
+    | e=expression { $out = new ASD.Bloc($e.out); }
+    | a=assignment { $out = new ASD.Bloc($a.out); }
+    ;
 
 assignment returns [ASD.Assignment out]
     : l=ident ASSIGN r=expression { $out = new ASD.Assignment($l.out, $r.out); }
