@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 public class ASD {
   static public class Program {
-    Expression e; // What a program contains. TODO : change when you extend the language
+    Statement s; // What a program contains. TODO : change when you extend the language
 
     public Program(Statement s) {
-      this.e = e;
+      this.s = s;
     }
 
     // Pretty-printer
     public String pp() {
-      return e.pp();
+      return s.pp();
     }
 
     // IR generation
@@ -22,13 +22,13 @@ public class ASD {
       // TODO : change when you extend the language
 
       // computes the IR of the expression
-      Expression.RetExpression retExpr = e.toIR();
+      Statement.RetStatement retStmt = s.toIR();
       // add a return instruction
-      Llvm.Instruction ret = new Llvm.Return(retExpr.type.toLlvmType(), retExpr.result);
-      retExpr.ir.appendCode(ret);
+      Llvm.Instruction ret = new Llvm.Return(retStmt.type.toLlvmType(), retStmt.result);
+      retStmt.ir.appendCode(ret);
 
 
-      return retExpr.ir;
+      return retStmt.ir;
     }
   }
 
@@ -42,17 +42,22 @@ public class ASD {
     static public class RetStatement{
       // The LLVM IR:
       public Llvm.IR ir;
+      public Type type;
+      public String result;
 
-      public RetStatement(Llvm.IR ir) {
+      public RetStatement(Llvm.IR ir, Type type, String result) {
         this.ir = ir;
+        this.type = type;
+        this.result = result;
       }
 
     }
   }
 
-  static public abstract class Assignable{
+  static public abstract class Assignable extends Statement{
+    /*
     public abstract String pp();
-    public abstract RetAssignable toIR() throws TypeException;
+    public abstract RetStatement toIR() throws TypeException;
 
     // Object returned by toIR on expressions, with IR + synthesized attributes
     static public class RetAssignable{
@@ -68,12 +73,13 @@ public class ASD {
         this.type = type;
         this.result = result;
       }
-    }
+    }*/
   }
 
-  static public abstract class Expression{
+  static public abstract class Expression extends Statement{
+    /*
     public abstract String pp();
-    public abstract RetExpression toIR() throws TypeException;
+    public abstract RetStatement toIR() throws TypeException;
 
     // Object returned by toIR on expressions, with IR + synthesized attributes
     static public class RetExpression{
@@ -89,7 +95,7 @@ public class ASD {
         this.type = type;
         this.result = result;
       }
-    }
+    }*/
   }
 
 
@@ -109,9 +115,9 @@ public class ASD {
     }
 
     // IR generation
-    public RetExpression toIR() throws TypeException {
-      RetExpression leftRet = left.toIR();
-      RetExpression rightRet = right.toIR();
+    public RetStatement toIR() throws TypeException {
+      RetStatement leftRet = left.toIR();
+      RetStatement rightRet = right.toIR();
 
       // We check if the types mismatches
       if(!leftRet.type.equals(rightRet.type)) {
@@ -133,7 +139,7 @@ public class ASD {
 
       // return the generated IR, plus the type of this expression
       // and where to find its result
-      return new RetExpression(leftRet.ir, leftRet.type, result);
+      return new RetStatement(leftRet.ir, leftRet.type, result);
     }
   }
 
@@ -153,9 +159,9 @@ public class ASD {
     }
 
     // IR generation
-    public RetExpression toIR() throws TypeException {
-      RetExpression leftRet = left.toIR();
-      RetExpression rightRet = right.toIR();
+    public RetStatement toIR() throws TypeException {
+      RetStatement leftRet = left.toIR();
+      RetStatement rightRet = right.toIR();
 
       // We check if the types mismatches
       if(!leftRet.type.equals(rightRet.type)) {
@@ -177,7 +183,7 @@ public class ASD {
 
       // return the generated IR, plus the type of this expression
       // and where to find its result
-      return new RetExpression(leftRet.ir, leftRet.type, result);
+      return new RetStatement(leftRet.ir, leftRet.type, result);
     }
   }
 
@@ -197,9 +203,9 @@ public class ASD {
     }
 
     // IR generation
-    public RetExpression toIR() throws TypeException {
-      RetExpression leftRet = left.toIR();
-      RetExpression rightRet = right.toIR();
+    public RetStatement toIR() throws TypeException {
+      RetStatement leftRet = left.toIR();
+      RetStatement rightRet = right.toIR();
 
       // We check if the types mismatches
       if(!leftRet.type.equals(rightRet.type)) {
@@ -221,7 +227,7 @@ public class ASD {
 
       // return the generated IR, plus the type of this expression
       // and where to find its result
-      return new RetExpression(leftRet.ir, leftRet.type, result);
+      return new RetStatement(leftRet.ir, leftRet.type, result);
     }
   }
 
@@ -241,9 +247,9 @@ public class ASD {
     }
 
     // IR generation
-    public RetExpression toIR() throws TypeException {
-      RetExpression leftRet = left.toIR();
-      RetExpression rightRet = right.toIR();
+    public RetStatement toIR() throws TypeException {
+      RetStatement leftRet = left.toIR();
+      RetStatement rightRet = right.toIR();
 
       // We check if the types mismatches
       if(!leftRet.type.equals(rightRet.type)) {
@@ -265,7 +271,7 @@ public class ASD {
 
       // return the generated IR, plus the type of this expression
       // and where to find its result
-      return new RetExpression(leftRet.ir, leftRet.type, result);
+      return new RetStatement(leftRet.ir, leftRet.type, result);
     }
   }
 
@@ -280,19 +286,36 @@ public class ASD {
       return "" + value;
     }
 
-    public RetExpression toIR() {
+    public RetStatement toIR() {
       // Here we simply return an empty IR
       // the `result' of this expression is the integer itself (as string)
-      return new RetExpression(new Llvm.IR(Llvm.empty(), Llvm.empty()), new IntType(), "" + value);
+      return new RetStatement(new Llvm.IR(Llvm.empty(), Llvm.empty()), new IntType(), "" + value);
+    }
+  }
+
+  static public class IdentAssignable extends Assignable {
+    String value;
+    public IdentAssignable(String value) {
+      this.value = value;
+    }
+
+    public String pp() {
+      return "" + value;
+    }
+
+    public RetStatement toIR() {
+      // Here we simply return an empty IR
+      // the `result' of this expression is the integer itself (as string)
+      return new RetStatement(new Llvm.IR(Llvm.empty(), Llvm.empty()), new IntType(), "" + value);
     }
   }
 
   // Concrete class for Statement: assignement case
-  static public class Assignement extends Statement {
+  static public class Assignment extends Statement {
     Assignable left;
     Expression right;
 
-    public Assignement (Assignable a, Expression e){
+    public Assignment (Assignable a, Expression e){
       left = a;
       right = e;
 
@@ -303,8 +326,8 @@ public class ASD {
     }
 
     public RetStatement toIR() throws TypeException {
-      Assignable.RetAssignable leftRet = left.toIR();
-      Expression.RetExpression rightRet = right.toIR();
+      Assignable.RetStatement leftRet = left.toIR();
+      Expression.RetStatement rightRet = right.toIR();
 
       // We check if the types mismatches
       if(!leftRet.type.equals(rightRet.type)) {
@@ -317,10 +340,10 @@ public class ASD {
 
       // new mul instruction result = left := right
       Llvm.Instruction assign = new Llvm.Assign(leftRet.result, rightRet.result);
-      
+
       leftRet.ir.appendCode(assign);
 
-      return new RetStatement(leftRet.ir);
+      return new RetStatement(leftRet.ir, leftRet.type, leftRet.result);
     }
   }
 
@@ -335,7 +358,8 @@ public class ASD {
       return "INT";
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       return obj instanceof IntType;
     }
 
