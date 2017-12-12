@@ -84,7 +84,17 @@ public class Llvm {
 
   // TODO : other types
 
+  static public class Comment extends Instruction {
+    String lvalue;
 
+    public Comment(String lvalue) {
+      this.lvalue = lvalue;
+    }
+
+    public String toString() {
+      return "; " + lvalue + "\n";
+    }
+  }
   // LLVM IR Instructions
   static public abstract class Instruction {
     public abstract String toString();

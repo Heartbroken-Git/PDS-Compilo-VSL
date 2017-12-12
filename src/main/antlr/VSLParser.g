@@ -17,11 +17,15 @@ options {
 
 program returns [ASD.Program out]
     : b=bloc { $out = new ASD.Program($b.out); }
+    ;
 
 bloc returns [ASD.Bloc out]
-    : b1=bloc b2=bloc { //TODO Concatenation des 2 blocs }
-    | e=expression { $out = new ASD.Bloc($e.out); }
-    | a=assignment { $out = new ASD.Bloc($a.out); }
+    : { List<ASD.Statement> ls = new ArrayList(); } (s=statement {ls.add($s.out);} )+ { $out = new ASD.Bloc(ls); }
+    ;
+
+statement returns [ASD.Statement out]
+    : e=expression { $out = $e.out; }
+    | a=assignment { $out = $a.out; }
     ;
 
 assignment returns [ASD.Assignment out]

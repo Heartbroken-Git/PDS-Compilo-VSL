@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 public class ASD {
   static public class Program {
-    Statement s; // What a program contains. TODO : change when you extend the language
+    Bloc b; // What a program contains. TODO : change when you extend the language
 
-    public Program(Statement s) {
-      this.s = s;
+    public Program(Bloc b) {
+      this.b = b;
     }
 
     // Pretty-printer
     public String pp() {
-      return s.pp();
+      return b.pp();
     }
 
     // IR generation
@@ -22,13 +22,13 @@ public class ASD {
       // TODO : change when you extend the language
 
       // computes the IR of the expression
-      Statement.RetStatement retStmt = s.toIR();
+      Bloc.RetBloc retBloc = b.toIR();
       // add a return instruction
-      Llvm.Instruction ret = new Llvm.Return(retStmt.type.toLlvmType(), retStmt.result);
-      retStmt.ir.appendCode(ret);
+      Llvm.Instruction ret = new Llvm.Return(retBloc.type.toLlvmType(), retBloc.result);
+      retBloc.ir.appendCode(ret);
 
 
-      return retStmt.ir;
+      return retBloc.ir;
     }
   }
 
@@ -59,31 +59,61 @@ public class ASD {
   static public abstract class Expression extends Statement{}
 
   static public class Bloc {
-    Statement s; // What a program contains. TODO : change when you extend the language
+    List<Statement> sl;
 
-    public Bloc(Statement s) {
-      this.s = s;
+    static public class RetBloc{
+      // The LLVM IR:
+      public Llvm.IR ir;
+      public Type type;
+      public String result;
+
+      public RetBloc(Llvm.IR ir, Type type, String result) {
+        this.ir = ir;
+        this.type = type;
+        this.result = result;
+      }
+
+    }
+    public Bloc(List<Statement> sl) {
+      this.sl = sl;
     }
 
     // Pretty-printer
     public String pp() {
-      return s.pp();
+
+      String affiche = "";
+      for(Statement s : sl) {
+        affiche += s.pp();
+      }
+      return affiche;
+
     }
 
     // IR generation
-    public Llvm.IR toIR() throws TypeException {
+    public RetBloc toIR() throws TypeException {
+      Llvm.IR irBlock = new  Llvm.IR(Llvm.empty(), Llvm.empty());
+
+      Llvm.Instruction commmentBlockD = new Llvm.Comment("Début bloc ");
+      irBlock.appendCode(commmentBlockD);
+
+      String lastExprRes = "0";
+      Type lastTypeRes = new IntType();
       // TODO : change when you extend the language
 
       // computes the IR of the expression
 
       //For tout les statements
-      Statement.RetStatement retStmt = s.toIR();
-      // add a return instruction
-      Llvm.Instruction ret = new Llvm.Return(retStmt.type.toLlvmType(), retStmt.result);
-      retStmt.ir.appendCode(ret);
+      for (Statement s : sl) {
+        Statement.RetStatement retStmt = s.toIR();
+        irBlock.append(retStmt.ir);
+        lastExprRes = retStmt.result;
+        lastTypeRes = retStmt.type;
+      }
       //Fin du For
+      commmentBlockD = new Llvm.Comment("Fin bloc ");
+      irBlock.appendCode(commmentBlockD);
 
-      return retStmt.ir;
+      return new RetBloc(irBlock, lastTypeRes, lastExprRes);
     }
   }
 
