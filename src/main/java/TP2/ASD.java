@@ -62,7 +62,7 @@ public class ASD {
     List<Statement> sl;
     List<Declaration> dl;
 
-    static public class RetBloc{
+    static public class RetBloc {
       // The LLVM IR:
       public Llvm.IR ir;
       public Type type;
@@ -75,6 +75,7 @@ public class ASD {
       }
 
     }
+
     public Bloc(List<Declaration> dl, List<Statement> sl) {
       this.dl = dl;
       this.sl = sl;
@@ -84,6 +85,10 @@ public class ASD {
     public String pp() {
 
       String affiche = "";
+      for(Declaration d : dl) {
+        affiche += d.pp();
+      }
+
       for(Statement s : sl) {
         affiche += s.pp();
       }
@@ -125,6 +130,16 @@ public class ASD {
     public Declaration (List<Assignable> al){
       this.al = al;
     }
+
+    public String pp() {
+      String affiche = "";
+      for(Assignable a : al) {
+        affiche += a.pp();
+      }
+      return affiche;
+    }
+
+    //TODO : Generation de code IR pour une declaration ???
 
   }
 
