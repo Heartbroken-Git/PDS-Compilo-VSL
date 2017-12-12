@@ -19,13 +19,15 @@ fragment DIGIT  : '0'..'9' ;
 fragment ASCII  : ~('\n'|'"');
 
 // keywords
-LP    : '(' ; // Left parenthesis
-RP    : ')' ;
-PLUS      : '+'      ;
-MINUS      : '-'      ;
-TIMES     : '*'      ;
-SDIV     : '/'      ;
-ASSIGN     : ':='      ;
+LP       : '('        ;
+RP       : ')'        ;
+PLUS     : '+'        ;
+MINUS    : '-'        ;
+TIMES    : '*'        ;
+SDIV     : '/'        ;
+ASSIGN   : ':='       ;
+TYPEINT  : 'INT'      ;
+VIRGULE  : ','        ;
 
 
 // TODO : other keywords

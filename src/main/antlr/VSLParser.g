@@ -20,7 +20,17 @@ program returns [ASD.Program out]
     ;
 
 bloc returns [ASD.Bloc out]
-    : { List<ASD.Statement> ls = new ArrayList(); } (s=statement {ls.add($s.out);} )+ { $out = new ASD.Bloc(ls); }
+    : { List<ASD.Statement> ls = new ArrayList(); List<ASD.Declaration> ld = new ArrayList(); }
+    (d=declaration {ld.add($d.out);} )*
+    (s=statement {ls.add($s.out);} )+
+    { $out = new ASD.Bloc(ld, ls); }
+    ;
+
+declaration returns [ASD.Declaration out]
+    : { List<ASD.Assignable> la = new ArrayList();}
+    TYPEINT (i=ident {la.add($i.out);} )
+    (VIRGULE i=ident {la.add($i.out);} )*
+    { $out = new ASD.Declaration(la); }
     ;
 
 statement returns [ASD.Statement out]
@@ -57,5 +67,6 @@ ident returns [ASD.Assignable out]
 
 primary returns [ASD.Expression out]
     : INTEGER { $out = new ASD.IntegerExpression($INTEGER.int); }
+    | IDENT { $out = new ASD.IdentExpression($IDENT.text); }
     // TODO : that's all?
     ;

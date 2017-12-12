@@ -60,6 +60,7 @@ public class ASD {
 
   static public class Bloc {
     List<Statement> sl;
+    List<Declaration> dl;
 
     static public class RetBloc{
       // The LLVM IR:
@@ -74,7 +75,8 @@ public class ASD {
       }
 
     }
-    public Bloc(List<Statement> sl) {
+    public Bloc(List<Declaration> dl, List<Statement> sl) {
+      this.dl = dl;
       this.sl = sl;
     }
 
@@ -115,6 +117,15 @@ public class ASD {
 
       return new RetBloc(irBlock, lastTypeRes, lastExprRes);
     }
+  }
+
+  static public class Declaration {
+    List<Assignable> al;
+
+    public Declaration (List<Assignable> al){
+      this.al = al;
+    }
+
   }
 
   // Concrete class for Expression: add case
@@ -307,6 +318,24 @@ public class ASD {
     public RetStatement toIR() {
       // Here we simply return an empty IR
       // the `result' of this expression is the integer itself (as string)
+      return new RetStatement(new Llvm.IR(Llvm.empty(), Llvm.empty()), new IntType(), "" + value);
+    }
+  }
+
+  // Concrete class for Expression: variable case
+  static public class IdentExpression extends Expression {
+    String value;
+    public IdentExpression(String value) {
+      this.value = value;
+    }
+
+    public String pp() {
+      return "" + value;
+    }
+
+    public RetStatement toIR() {
+      // Here we simply return an empty IR
+      // the `result' of this expression is the value of the ident itself
       return new RetStatement(new Llvm.IR(Llvm.empty(), Llvm.empty()), new IntType(), "" + value);
     }
   }
